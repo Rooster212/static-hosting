@@ -1,0 +1,75 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Static hosting template
+Parameters:
+  BranchName:
+    Type: String
+    Description: Name of the feature branch.
+  # WebsiteCloudFrontViewerRequestLambdaFunctionARN:
+  #   Type: String
+  #   Description: ARN of the Lambda@Edge function that does rewriting of URLs (must be in us-east-1). See index.js
+
+Resources:      
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+
+  WebsiteCloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub 'CloudFront OAI for ${BranchName}'
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref WebsiteBucket, "/*" ] ]
+            Principal:
+              CanonicalUser: !GetAtt WebsiteCloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+  WebsiteCloudfront:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+    - WebsiteBucket
+    Properties:
+      DistributionConfig:
+        Comment: !Ref 'BranchName'
+        Origins:
+          - DomainName: !GetAtt WebsiteBucket.DomainName
+            Id: s3origin
+            S3OriginConfig:
+              OriginAccessIdentity:
+                !Join [ "", [ "origin-access-identity/cloudfront/", !Ref WebsiteCloudFrontOriginAccessIdentity ] ]
+        DefaultCacheBehavior:
+          TargetOriginId: s3origin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+        Enabled: true
+        HttpVersion: http2
+        DefaultRootObject: index.html
+        IPV6Enabled: true
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: '/error/index.html'
+        PriceClass: PriceClass_100
+      Tags:
+        -
+          Key: Name
+          Value: !Ref 'BranchName'
+
+Outputs:
+  BucketName:
+    Description: WebsiteBucket
+    Value: !Ref WebsiteBucket
+  WebsiteCloudfront:
+    Description: WebsiteCloudfront
+    Value: !GetAtt WebsiteCloudfront.DomainName
