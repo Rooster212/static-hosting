@@ -5,6 +5,15 @@ Parameters:
   BranchName:
     Type: String
     Description: Name of the feature branch.
+  Route53ZoneName:
+    Type: String
+    Default: 'yourdomain.net'
+    Description: "Required: Route53 Zone, either existing or name to be created."
+  Route53HostedZoneId:
+    Type: String
+  CertificateArn:
+    Type: String
+    Description: Name of the feature branch.
   # WebsiteCloudFrontViewerRequestLambdaFunctionARN:
   #   Type: String
   #   Description: ARN of the Lambda@Edge function that does rewriting of URLs (must be in us-east-1). See index.js
@@ -60,11 +69,27 @@ Resources:
           - ErrorCode: 403
             ResponseCode: 404
             ResponsePagePath: '/error/index.html'
+        Aliases:
+          - !Sub ${BranchName}.${Route53ZoneName}
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
         PriceClass: PriceClass_100
       Tags:
         -
           Key: Name
           Value: !Ref 'BranchName'
+  
+  BranchWWWAlias:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Sub ${BranchName}.${Route53ZoneName}
+      Type: CNAME
+      AliasTarget:
+        HostedZoneId: !Ref Route53HostedZoneId
+        DNSName: !GetAtt WebsiteCloudfront.DomainName
 
 Outputs:
   BucketName:
