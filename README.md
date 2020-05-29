@@ -19,7 +19,7 @@ Once that certificate has been created you have to go to the AWS Certificate Sto
 
 ![cert store image](awscertstore-createrecord.png?raw=true)
 
-I think this step is manual for security reasons. But by verifying the domain with Route53 via Certificate Manager, I was able to create subdomain certificates without issues.
+I think this step is manual for security reasons. But by verifying the domain with Route53 via Certificate Manager, I was able to create subdomain certificates without having to do the validation again (there is still a propagation/verification time though which is worth bearing in mind, it only took 2-3 minutes in my case)
 
 # Deploy
 
