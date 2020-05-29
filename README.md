@@ -43,3 +43,5 @@ https://github.com/dflook/cloudformation-dns-certificate
 https://github.com/awslabs/route53-dynamic-dns-with-lambda/blob/master/route53-ddns.yml
 
 https://github.com/tongueroo/cloudformation-examples/blob/master/templates/instance-and-route53.yml
+
+https://correctme.ifiamwrong.com/posts/cloudfrontcloudformation/
