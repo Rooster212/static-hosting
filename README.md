@@ -1,6 +1,6 @@
 # Static website hosting via CloudFront with automated custom DNS through Route53
 
-# Prerequisites
+## Prerequisites
 
 In my case I've added `aws.jamieroos.dev` as a subdomain hosted zone to Route53.
 
@@ -12,7 +12,7 @@ I also added the root certificate of `aws.jamieroos.dev` to the AWS certificate 
 AWS_REGION=us-east-1 AWS_PAGER='' aws acm request-certificate \
     --domain-name aws.rooster212.com --validation-method DNS \
     --idempotency-token 1234 \
-    --options CertificateTransparencyLoggingPreference=DISABLED
+    --options CertificateTransparencyLoggingPreference=ENABLED
 ```
 
 Once that certificate has been created you have to go to the AWS Certificate Store to add the verification record. As the subdomain is on Route53, I can click the button and it'll add the record and verify it:
@@ -21,18 +21,18 @@ Once that certificate has been created you have to go to the AWS Certificate Sto
 
 I think this step is manual for security reasons. But by verifying the domain with Route53 via Certificate Manager, I was able to create subdomain certificates without having to do the validation again (there is still a propagation/verification time though which is worth bearing in mind, it only took 2-3 minutes in my case)
 
-# Deploy
+## Deploy
 
-First you need to create a certificate - this doesn't seem to be possible through CloudFormation yet (or it uses Lambda and custom CloudFormation scripts). In my case I'm using `*.aws.jamieroos.dev`:
+First you need to create a certificate - this doesn't seem to be possible through CloudFormation yet (or it uses Lambda and custom CloudFormation scripts in examples I've seen). In my case I'm using `*.aws.jamieroos.dev`:
 
 ```bash
-./00-create-certificate.sh *.aws.jamieroos.dev
+./00-create-certificate.sh '*.aws.jamieroos.dev'
 ```
 
-Then existing infra can be created using the `.sh` files, there has been a change though as you'll need to pass through the base domain, cert ARN and hosted zone ID (this can likely be condensed or stored in CI):
+Then the infrastucture can be created using the CloudFormation template - you can use the script as per the below, passing through the base domain, certificate ARN and hosted zone ID. You might want to put the ARN into single quotes to avoid any bash script confusion. These parameters could be static CI variables as they won't need to change once they are setup, or they could also be pulled from the AWS CLI.
 
 ```bash
-./01-create-stack.sh aws.jamieroos.dev <hostedzoneid> <certarn>
+./01-create-stack.sh aws.jamieroos.dev <hostedzoneid> '<certARN>'
 ./02-upload-site.sh
 ```
 

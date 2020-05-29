@@ -98,3 +98,6 @@ Outputs:
   WebsiteCloudfront:
     Description: WebsiteCloudfront
     Value: !GetAtt WebsiteCloudfront.DomainName
+  WebsiteCloudfrontAlias:
+    Description: Alias using custom domain through Route53
+    Value: !Sub ${BranchName}.${Route53ZoneName}
