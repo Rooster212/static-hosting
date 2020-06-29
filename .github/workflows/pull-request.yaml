@@ -1,6 +1,8 @@
 name: Pull Request
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened]
 
 jobs:
   checks:
@@ -13,4 +15,5 @@ jobs:
         if: "${{ github.event_name }}" == "pull_request"
         with:
           issue-number: ${{ github.event.number }}
-          body: Hey look, a test comment!
+          body: |
+            Hey look, **a test comment**!
