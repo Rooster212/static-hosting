@@ -15,4 +15,9 @@ jobs:
         with:
           issue-number: ${{ github.event.number }}
           body: |
-            Hey look, **a test comment**!
+            # Hello World!
+            
+            Hello | World
+            -------|-------
+            **Workflows** | [Workflow Events](https://help.github.com/en/actions/reference/events-that-trigger-workflows)
+            **GH Markdown** | [Linky](https://guides.github.com/features/mastering-markdown/)
